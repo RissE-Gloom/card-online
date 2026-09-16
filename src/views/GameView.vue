@@ -32,6 +32,7 @@ const {
   currentTurn,
   turnState,
   originalAttacker,
+  selectedAttackCardIndex,
   winner,
   isAIMode
 } = storeToRefs(gameStore)
@@ -149,6 +150,10 @@ const handlePlayCard = (card: Card) => {
   gameStore.playCard(card)
 }
 
+const handleSelectAttackCard = (index: number) => {
+  gameStore.selectAttackCard(index)
+}
+
 const handleBeat = () => {
   gameStore.beatCards()
 }
@@ -183,7 +188,13 @@ const handleRematch = () => {
       </div>
       
       <div class="play-area-wrapper">
-        <PlayArea :attack-cards="attackCards" :defend-cards="defendCards" />
+        <PlayArea 
+          :attack-cards="attackCards" 
+          :defend-cards="defendCards"
+          :selected-attack-card-index="selectedAttackCardIndex"
+          :can-select-attack-card="turnState === 'defend' && currentTurn === (playerRole ?? 'player')"
+          @select-attack-card="handleSelectAttackCard"
+        />
       </div>
     </div>
 

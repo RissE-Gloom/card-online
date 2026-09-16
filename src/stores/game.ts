@@ -41,6 +41,7 @@ export const useGameStore = defineStore('game', () => {
   const canTransfer = ref(false) // Можно ли переводить (только в переводном дураке)
   const hasDefended = ref(false) // Начал ли защитник отбиваться
   const isFirstRound = ref(true) // Первый кон игры (переводить нельзя)
+  const selectedAttackCardIndex = ref<number | null>(null) // Индекс выбранной карты атаки для защиты
   const status = ref<'waiting' | 'playing' | 'finished'>('waiting')
   const winner = ref<'player' | 'opponent' | 'draw' | null>(null)
   const isAIMode = ref(false)
@@ -84,17 +85,37 @@ export const useGameStore = defineStore('game', () => {
   const validDefenseCards = computed(() => {
     if (turnState.value !== 'defend') return []
     
-    // Нужно крыть последнюю некрытую карту атаки
-    const uncoveredIndex = defendCards.value.length
-    if (uncoveredIndex >= attackCards.value.length) return []
+    // Определяем какую карту нужно крыть
+    let cardIndexToDefend: number
     
-    const cardToDefend = attackCards.value[uncoveredIndex]
+    if (selectedAttackCardIndex.value !== null) {
+      // Если выбрана конкретная карта - крыть её
+      cardIndexToDefend = selectedAttackCardIndex.value
+    } else {
+      // Если не выбрана - крыть первую некрытую
+      cardIndexToDefend = defendCards.value.length
+    }
+    
+    if (cardIndexToDefend >= attackCards.value.length) return []
+    
+    const cardToDefend = attackCards.value[cardIndexToDefend]
     return getValidDefenseCards(
       cardToDefend,
       currentTurn.value === 'player' ? playerHand.value : opponentHand.value,
       trump.value!.suit
     )
   })
+
+  function selectAttackCard(index: number) {
+    // Можно выбирать только в режиме защиты
+    if (turnState.value !== 'defend') return
+    
+    // Можно выбирать только некрытые карты
+    if (defendCards.value[index] !== undefined) return
+    
+    selectedAttackCardIndex.value = index
+    console.log('🎯 Selected attack card to defend:', index)
+  }
 
   function getGameState(): GameState {
   return {
@@ -362,35 +383,77 @@ async function loadGame(sid: string) {
       console.log('isFirstRound:', isFirstRound.value)
       console.log('attackCards:', attackCards.value.length)
       
-      // В переводном: если есть карта того же ранга и не начал отбиваться - можно перевести
+      // В переводном: можно перевести если есть карта того же ранга что и непокрытая карта атаки
       // Первый кон переводить нельзя!
-      if (mode.value === 'perevolnoy' && canTransfer.value && !hasDefended.value && !isFirstRound.value) {
-        const lastAttackCard = attackCards.value[attackCards.value.length - 1]
-        console.log('Проверка перевода для карты:', card.rank, 'vs', lastAttackCard.rank)
-        if (card.rank === lastAttackCard.rank) {
+      if (mode.value === 'perevolnoy' && !isFirstRound.value) {
+        // Проверяем ранги всех НЕПОКРЫТЫХ карт атаки
+        const uncoveredAttackCards = attackCards.value.filter((_, index) => defendCards.value[index] === undefined)
+        const hasMatchingRank = uncoveredAttackCards.some(attackCard => attackCard.rank === card.rank)
+        
+        console.log('Проверка перевода:', {
+          cardRank: card.rank,
+          uncoveredAttackCards: uncoveredAttackCards.map(c => c.rank),
+          hasMatchingRank,
+          hasDefended: hasDefended.value,
+          canTransfer: canTransfer.value
+        })
+        
+        if (hasMatchingRank) {
           // ПЕРЕВОД!
           myHandRef.value = myHandRef.value.filter(c => c.id !== card.id)
-          attackCards.value.push(card)
           
-          console.log('Игрок переводит!')
-          canTransfer.value = false
+          // Покрытые пары уходят в отбой
+          const coveredPairs: Card[] = []
+          const remainingAttackCards: Card[] = []
           
-          // Ход переходит обратно к изначальному атакующему для защиты
-          if (originalAttacker.value === mySide) {
-            // Я атаковал -> противник перевёл -> ход возвращается мне для защиты
-            currentTurn.value = mySide
-            turnState.value = 'defend'
-          } else {
-            // Противник атаковал -> я перевёл -> ход к противнику для защиты
-            currentTurn.value = mySide === 'player' ? 'opponent' : 'player'
-            turnState.value = 'defend'
-            
-            if (isAIMode.value) {
-              setTimeout(() => aiTurn(), 1000)
+          attackCards.value.forEach((attackCard, index) => {
+            if (defendCards.value[index] !== undefined) {
+              // Пара покрыта - в отбой
+              coveredPairs.push(attackCard, defendCards.value[index])
+            } else {
+              // Непокрытая карта - остается на столе
+              remainingAttackCards.push(attackCard)
             }
-
-            saveGameState()
+          })
+          
+          // Добавляем карту перевода
+          remainingAttackCards.push(card)
+          
+          // Обновляем состояние
+          discardPile.value.push(...coveredPairs)
+          attackCards.value = remainingAttackCards
+          defendCards.value = [] // Очищаем защитные карты
+          
+          console.log('Перевод!', {
+            coveredPairsCount: coveredPairs.length / 2,
+            remainingAttackCards: remainingAttackCards.length
+          })
+          
+          canTransfer.value = false
+          hasDefended.value = false // Сбрасываем флаг защиты
+          selectedAttackCardIndex.value = null // Сбрасываем выбор
+          
+          // При переводе оригинальный атакующий меняется
+          // Тот кто перевел становится новым атакующим
+          const newDefender = originalAttacker.value
+          originalAttacker.value = mySide // Тот кто перевел теперь атакующий
+          
+          // Ход переходит к тому кто был атакующим (теперь он защищается)
+          currentTurn.value = newDefender!
+          turnState.value = 'defend'
+          
+          console.log('Смена ролей после перевода:', {
+            newAttacker: originalAttacker.value,
+            newDefender: newDefender,
+            currentTurn: currentTurn.value,
+            turnState: turnState.value
+          })
+          
+          if (isAIMode.value && currentTurn.value === 'opponent') {
+            setTimeout(() => aiTurn(), 1000)
           }
+          
+          saveGameState()
           return
         }
       }
@@ -403,12 +466,24 @@ async function loadGame(sid: string) {
       }
 
       myHandRef.value = myHandRef.value.filter(c => c.id !== card.id)
-      defendCards.value.push(card)
+      
+      // Определяем какую карту атаки кроем
+      const defendIndex = selectedAttackCardIndex.value !== null 
+        ? selectedAttackCardIndex.value 
+        : defendCards.value.length
+      
+      // Создаем новый массив защитных карт с картой на нужной позиции
+      const newDefendCards = [...defendCards.value]
+      newDefendCards[defendIndex] = card
+      defendCards.value = newDefendCards
+      
       hasDefended.value = true // Начал отбиваться
       canTransfer.value = false // Больше нельзя переводить
+      selectedAttackCardIndex.value = null // Сбрасываем выбор
       
       // Если все карты покрыты - переход к атакующему для подкидывания
-      if (defendCards.value.length === attackCards.value.length) {
+      const allCovered = defendCards.value.filter(c => c !== undefined).length === attackCards.value.length
+      if (allCovered) {
         currentTurn.value = originalAttacker.value! // Возврат хода к атакующему
         turnState.value = 'attack'
       }
@@ -650,6 +725,7 @@ async function loadGame(sid: string) {
     currentTurn,
     turnState,
     originalAttacker,
+    selectedAttackCardIndex,
     status,
     winner,
     isAIMode,
@@ -657,6 +733,7 @@ async function loadGame(sid: string) {
     validDefenseCards,
     initGame,
     playCard,
+    selectAttackCard,
     beatCards,
     takeCards,
     loadGame,

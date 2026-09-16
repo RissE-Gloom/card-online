@@ -5,9 +5,22 @@ import type { Card as CardType } from '@/types/game'
 interface Props {
   attackCards: CardType[]
   defendCards: CardType[]
+  selectedAttackCardIndex?: number | null
+  canSelectAttackCard?: boolean
 }
 
-defineProps<Props>()
+withDefaults(defineProps<Props>(), {
+  selectedAttackCardIndex: null,
+  canSelectAttackCard: false
+})
+
+const emit = defineEmits<{
+  selectAttackCard: [index: number]
+}>()
+
+const handleAttackCardClick = (index: number) => {
+  emit('selectAttackCard', index)
+}
 </script>
 
 <template>
@@ -24,7 +37,14 @@ defineProps<Props>()
         class="card-slot"
       >
         <!-- Атакующая карта -->
-        <div class="card-wrapper">
+        <div 
+          class="card-wrapper attack-wrapper"
+          :class="{ 
+            'selected': selectedAttackCardIndex === index,
+            'clickable': canSelectAttackCard && !defendCards[index]
+          }"
+          @click="canSelectAttackCard && !defendCards[index] && handleAttackCardClick(index)"
+        >
           <Card :card="attackCard" size="large" class="attack-card" />
         </div>
         
@@ -81,6 +101,43 @@ defineProps<Props>()
   @media (min-width: 1920px) {
     width: 140px;
     height: 196px;
+  }
+}
+
+.attack-wrapper {
+  transition: all 0.2s ease;
+  
+  &.clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-5px);
+      filter: brightness(1.1);
+    }
+  }
+  
+  &.selected {
+    transform: translateY(-10px);
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+    
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border: 3px solid gold;
+      border-radius: 12px;
+      pointer-events: none;
+      animation: pulse 1s infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }
 
