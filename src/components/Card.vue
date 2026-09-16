@@ -93,7 +93,7 @@ const getSuitColor = (suit: string) => {
     
     @media (min-width: 1920px) {
       width: 140px;
-      height: 196px;
+      height: 233px;
     }
   }
 }

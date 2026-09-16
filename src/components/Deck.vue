@@ -71,6 +71,11 @@ const emit = defineEmits<Emits>()
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
+
+  @media (min-width: 1920px) {
+      position: relative;
+      left: -60px;
+    }
 }
 
 .card-count {
@@ -115,6 +120,9 @@ const emit = defineEmits<Emits>()
   top: 32%;
   transform: translate(-50%, -50%) rotate(90deg);
   z-index: 0;
+  @media (min-width: 1920px) {
+      left: -55%;
+    }
 }
 
 .deck-cards {
@@ -128,5 +136,9 @@ const emit = defineEmits<Emits>()
     left: 0;
     top: 0;
   }
+
+  @media (min-width: 1920px) {
+      left: -50%;
+    }
 }
 </style>
