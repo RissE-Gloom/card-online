@@ -33,6 +33,7 @@ const {
   turnState,
   originalAttacker,
   selectedAttackCardIndex,
+  pendingCard,
   winner,
   isAIMode
 } = storeToRefs(gameStore)
@@ -154,6 +155,18 @@ const handleSelectAttackCard = (index: number) => {
   gameStore.selectAttackCard(index)
 }
 
+const handleConfirmDefend = (targetIndex: number) => {
+  if (pendingCard.value) {
+    gameStore.confirmDefend(pendingCard.value, targetIndex)
+  }
+}
+
+const handleConfirmTransfer = () => {
+  if (pendingCard.value) {
+    gameStore.confirmTransfer(pendingCard.value)
+  }
+}
+
 const handleBeat = () => {
   gameStore.beatCards()
 }
@@ -193,7 +206,10 @@ const handleRematch = () => {
           :defend-cards="defendCards"
           :selected-attack-card-index="selectedAttackCardIndex"
           :can-select-attack-card="turnState === 'defend' && currentTurn === (playerRole ?? 'player')"
+          :pending-card="pendingCard"
           @select-attack-card="handleSelectAttackCard"
+          @confirm-defend="handleConfirmDefend"
+          @confirm-transfer="handleConfirmTransfer"
         />
       </div>
     </div>
@@ -203,6 +219,7 @@ const handleRematch = () => {
       <PlayerHand 
         :cards="myHand" 
         :is-own="true"
+        :pending-card="pendingCard"
         @play-card="handlePlayCard"
       />
       <GameControls 

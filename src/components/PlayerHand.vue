@@ -6,10 +6,12 @@ import type { Card as CardType } from '@/types/game'
 interface Props {
   cards: CardType[]
   isOwn?: boolean
+  pendingCard?: CardType | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  isOwn: false
+  isOwn: false,
+  pendingCard: null
 })
 
 interface Emits {
@@ -27,6 +29,10 @@ const handleCardClick = (card: CardType) => {
     emit('playCard', card)
   }
 }
+
+const isPending = (card: CardType) => {
+  return props.pendingCard?.id === card.id
+}
 </script>
 
 <template>
@@ -35,7 +41,10 @@ const handleCardClick = (card: CardType) => {
       <div
         v-for="(card, index) in displayCards"
         :key="card.id"
-        :class="['card-wrapper', { interactive: isOwn }]"
+        :class="['card-wrapper', { 
+          interactive: isOwn,
+          pending: isPending(card)
+        }]"
         :style="{ 
           transform: `rotate(${(index - displayCards.length / 2) * 2}deg)`,
           zIndex: index
@@ -90,6 +99,22 @@ const handleCardClick = (card: CardType) => {
       margin-bottom: 15px;
       z-index: 100 !important;
     }
+  }
+  
+  &.pending {
+    margin-bottom: 30px;
+    z-index: 100 !important;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9));
+    animation: pendingPulse 1.5s infinite;
+  }
+}
+
+@keyframes pendingPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(255, 215, 0, 1));
   }
 }
 

@@ -7,19 +7,23 @@ interface Props {
   defendCards: CardType[]
   selectedAttackCardIndex?: number | null
   canSelectAttackCard?: boolean
+  pendingCard?: CardType | null
 }
 
 withDefaults(defineProps<Props>(), {
   selectedAttackCardIndex: null,
-  canSelectAttackCard: false
+  canSelectAttackCard: false,
+  pendingCard: null
 })
 
 const emit = defineEmits<{
   selectAttackCard: [index: number]
+  confirmDefend: [targetIndex: number]
+  confirmTransfer: []
 }>()
 
 const handleAttackCardClick = (index: number) => {
-  emit('selectAttackCard', index)
+  emit('confirmDefend', index)
 }
 </script>
 
@@ -41,9 +45,9 @@ const handleAttackCardClick = (index: number) => {
           class="card-wrapper attack-wrapper"
           :class="{ 
             'selected': selectedAttackCardIndex === index,
-            'clickable': canSelectAttackCard && !defendCards[index]
+            'clickable': pendingCard && !defendCards[index]
           }"
-          @click="canSelectAttackCard && !defendCards[index] && handleAttackCardClick(index)"
+          @click="pendingCard && !defendCards[index] && emit('confirmDefend', index)"
         >
           <Card :card="attackCard" size="large" class="attack-card" />
         </div>
@@ -55,6 +59,27 @@ const handleAttackCardClick = (index: number) => {
             size="large" 
             class="defend-card"
           />
+        </div>
+        
+        <!-- Слот для выбора: защитить эту карту -->
+        <div 
+          v-if="pendingCard && !defendCards[index]"
+          class="defend-slot"
+          :class="{ 'selected': selectedAttackCardIndex === index }"
+          @click="emit('confirmDefend', index)"
+        >
+          <span class="slot-label">Защитить</span>
+        </div>
+      </div>
+      
+      <!-- Слот для перевода (справа от всех карт) -->
+      <div v-if="pendingCard" class="card-slot transfer-slot">
+        <div 
+          class="transfer-area"
+          @click="emit('confirmTransfer')"
+        >
+          <div class="transfer-icon">🔄</div>
+          <span class="slot-label">Перевести</span>
         </div>
       </div>
     </div>
@@ -139,6 +164,83 @@ const handleAttackCardClick = (index: number) => {
   50% {
     opacity: 0.5;
   }
+}
+
+/* Слот для защиты */
+.defend-slot {
+  position: absolute;
+  bottom: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 40px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px dashed #10b981;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: pulse 2s infinite;
+  
+  &:hover {
+    background: rgba(16, 185, 129, 0.3);
+    border-color: #34d399;
+    transform: translateX(-50%) translateY(-2px);
+  }
+  
+  &.selected {
+    border-color: gold;
+    background: rgba(255, 215, 0, 0.2);
+  }
+}
+
+/* Слот для перевода */
+.transfer-slot {
+  position: relative;
+  width: 110px;
+  height: 177px;
+  
+  @media (min-width: 1920px) {
+    width: 140px;
+    height: 196px;
+  }
+}
+
+.transfer-area {
+  width: 100%;
+  height: 100%;
+  background: rgba(59, 130, 246, 0.15);
+  border: 3px dashed #3b82f6;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  animation: pulse 2s infinite;
+  
+  &:hover {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: #60a5fa;
+    transform: translateY(-5px) scale(1.05);
+  }
+}
+
+.transfer-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.8));
+}
+
+.slot-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.5px;
 }
 
 .attack-card {
