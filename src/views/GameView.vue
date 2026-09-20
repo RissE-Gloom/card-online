@@ -180,7 +180,16 @@ const handleRematch = () => {
   const gameMode = (route.query.mode as GameMode) || 'podkidnoy'
   const aiMode = route.query.ai === 'true'
   
-  gameStore.initGame(sid, gameMode, aiMode)
+  // Только игрок с ролью 'player' создаёт реванш
+  // Это предотвращает создание двух разных игр
+  if (playerRole.value === 'player') {
+    console.log('🔄 Player 1 создаёт реванш')
+    gameStore.initGame(sid, gameMode, aiMode, true) // forceCreate = true
+  } else {
+    console.log('⏳ Player 2 ждёт создания реванша...')
+    // Opponent просто ждёт обновления от Firebase
+    // applyGameState() применит новое состояние автоматически через subscription
+  }
 }
 </script>
 

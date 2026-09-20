@@ -147,26 +147,12 @@ export const useGameStore = defineStore('game', () => {
     const mySide = playerRole.value ?? 'player'
     const myHandRef = mySide === 'player' ? playerHand : opponentHand
     
-    // Удаляем карту из руки СЕЙЧАС (если она ещё там)
+    // Удаляем карту из руки
     myHandRef.value = myHandRef.value.filter(c => c.id !== card.id)
     
-    // Покрытые пары уходят в отбой
-    const coveredPairs: Card[] = []
-    const remainingAttackCards: Card[] = []
-    
-    attackCards.value.forEach((attackCard, index) => {
-      if (defendCards.value[index] !== undefined) {
-        coveredPairs.push(attackCard, defendCards.value[index])
-      } else {
-        remainingAttackCards.push(attackCard)
-      }
-    })
-    
-    remainingAttackCards.push(card)
-    
-    discardPile.value.push(...coveredPairs)
-    attackCards.value = remainingAttackCards
-    defendCards.value = []
+    // Все карты атаки + карта перевода переходят к новому защитнику
+    // (покрытых пар быть не может, так как перевод возможен только если hasDefended === false)
+    attackCards.value.push(card)
     
     canTransfer.value = false
     hasDefended.value = false
@@ -326,8 +312,8 @@ async function loadGame(sid: string) {
   return true
 }
 
-  function initGame(sid: string, gameMode: GameMode, aiMode = false) {
-    console.log('🎮 initGame started:', { sid, gameMode, aiMode })
+  function initGame(sid: string, gameMode: GameMode, aiMode = false, forceCreate = false) {
+    console.log('🎮 initGame started:', { sid, gameMode, aiMode, forceCreate })
     
     sessionId.value = sid
     mode.value = gameMode
@@ -370,17 +356,29 @@ async function loadGame(sid: string) {
     const stateToSave = getGameState()
     console.log('💾 Saving initial state to Firebase:', stateToSave)
 
-    createGameSessionIfAbsent(sid, stateToSave)
-      .then((created) => {
-        if (created) {
-          console.log('✅ Game created in Firebase:', sid)
-        } else {
-          console.log('ℹ️ Session already existed:', sid)
-        }
-      })
-      .catch((error) => {
-        console.error('❌ Failed to create game in Firebase:', error)
-      })
+    if (forceCreate) {
+      // Принудительно перезаписываем сессию (для реванша)
+      updateGameSession(sid, stateToSave)
+        .then(() => {
+          console.log('✅ Game forcefully updated in Firebase:', sid)
+        })
+        .catch((error) => {
+          console.error('❌ Failed to update game in Firebase:', error)
+        })
+    } else {
+      // Обычное создание (только если сессии ещё нет)
+      createGameSessionIfAbsent(sid, stateToSave)
+        .then((created) => {
+          if (created) {
+            console.log('✅ Game created in Firebase:', sid)
+          } else {
+            console.log('ℹ️ Session already existed:', sid)
+          }
+        })
+        .catch((error) => {
+          console.error('❌ Failed to create game in Firebase:', error)
+        })
+    }
   }
 
   function playCard(card: Card) {
@@ -411,13 +409,14 @@ async function loadGame(sid: string) {
       }
       
       // Проверка: подкидывать можно только если защитник крыл предыдущие карты
-      if (attackCards.value.length > 0 && defendCards.value.length < attackCards.value.length) {
+      // НО эта проверка только для подкидывания ПОСЛЕ защиты (когда есть defendCards)
+      if (defendCards.value.length > 0 && defendCards.value.length < attackCards.value.length) {
         console.log('Нельзя подкидывать пока не все карты покрыты!')
         return
       }
       
-      // Проверка рангов при подкидывании
-      if (attackCards.value.length > 0) {
+      // Проверка рангов при подкидывании (только если это не первая карта)
+      if (attackCards.value.length > 0 || defendCards.value.length > 0) {
         const ranksOnTable = new Set([
           ...attackCards.value.map(c => c.rank),
           ...defendCards.value.map(c => c.rank)
@@ -431,21 +430,30 @@ async function loadGame(sid: string) {
       myHandRef.value = myHandRef.value.filter(c => c.id !== card.id)
       attackCards.value.push(card)
       
-      // Переход к защите
-      currentTurn.value = mySide === 'player' ? 'opponent' : 'player'
-      turnState.value = 'defend'
-      hasDefended.value = false // Сброс флага защиты
+      // Проверяем есть ли ещё карты для подкидывания
+      const ranksOnTable = new Set([
+        ...attackCards.value.map(c => c.rank),
+        ...defendCards.value.map(c => c.rank)
+      ])
+      const canThrowMore = myHandRef.value.some(c => ranksOnTable.has(c.rank))
       
-      // В переводном дураке можно переводить всегда (проверка на первый кон будет в условии)
-      if (mode.value === 'perevolnoy') {
-        canTransfer.value = true
+      if (canThrowMore) {
+        // Есть карты для подкидывания - запускаем таймер 5 секунд
+        console.log('✋ Можно подкинуть ещё карты, таймер 5 сек')
+        saveGameState()
+        
+        setTimeout(() => {
+          // Проверяем что ход всё ещё у этого игрока и в режиме атаки
+          if (currentTurn.value === mySide && turnState.value === 'attack' && attackCards.value.length > 0) {
+            console.log('⏱️ Таймер истёк, передаём ход автоматически')
+            passAttackTurn()
+          }
+        }, 5000)
+      } else {
+        // Нет карт для подкидывания - сразу передаём ход
+        console.log('🔄 Нет карт для подкидывания, передаём ход сразу')
+        passAttackTurn()
       }
-
-      if (isAIMode.value) {
-        setTimeout(() => aiTurn(), 1000)
-      }
-
-      saveGameState()
     } else if (turnState.value === 'defend') {
       // ЗАЩИТА ИГРОКА
       
@@ -461,10 +469,10 @@ async function loadGame(sid: string) {
       const canDefendWithCard = validCards.find(c => c.id === card.id) !== undefined
       
       // Проверяем можно ли перевести этой картой
-      // В переводном: можно перевести если есть карта того же ранга что и непокрытая карта атаки
+      // В переводном: можно перевести ТОЛЬКО если ещё НЕ начал отбиваться
       // Первый кон переводить нельзя!
       let canTransferWithCard = false
-      if (mode.value === 'perevolnoy' && !isFirstRound.value) {
+      if (mode.value === 'perevolnoy' && !isFirstRound.value && !hasDefended.value) {
         const uncoveredAttackCards = attackCards.value.filter((_, index) => defendCards.value[index] === undefined)
         canTransferWithCard = uncoveredAttackCards.some(attackCard => attackCard.rank === card.rank)
       }
@@ -472,7 +480,8 @@ async function loadGame(sid: string) {
       console.log('Проверка возможностей:', {
         cardRank: card.rank,
         canTransfer: canTransferWithCard,
-        canDefend: canDefendWithCard
+        canDefend: canDefendWithCard,
+        hasDefended: hasDefended.value
       })
       
       // Если карта НЕ может ни защитить, ни перевести - отклоняем
@@ -570,8 +579,11 @@ async function loadGame(sid: string) {
       // В переводном: если есть карта того же ранга и не начал отбиваться - можно перевести
       // Первый кон переводить нельзя!
       if (mode.value === 'perevolnoy' && canTransfer.value && !hasDefended.value && !isFirstRound.value) {
-        const lastAttackCard = attackCards.value[attackCards.value.length - 1]
-        const transferCard = opponentHand.value.find(c => c.rank === lastAttackCard.rank)
+        // Проверяем есть ли карта того же ранга что и любая непокрытая карта атаки
+        const uncoveredAttackCards = attackCards.value.filter((_, index) => defendCards.value[index] === undefined)
+        const transferCard = opponentHand.value.find(c => 
+          uncoveredAttackCards.some(attackCard => attackCard.rank === c.rank)
+        )
         
         if (transferCard) {
           // ПЕРЕВОД!
@@ -579,18 +591,20 @@ async function loadGame(sid: string) {
           opponentHand.value = opponentHand.value.filter(c => c.id !== transferCard.id)
           attackCards.value.push(transferCard)
           canTransfer.value = false
+          hasDefended.value = false
           
-          // Ход переходит обратно к изначальному атакующему для защиты
-          if (originalAttacker.value === 'opponent') {
-            // ИИ атаковал -> игрок перевёл -> ход возвращается ИИ для защиты
-            currentTurn.value = 'opponent'
-            turnState.value = 'defend'
-            
+          // При переводе оригинальный атакующий меняется
+          const newDefender = originalAttacker.value
+          originalAttacker.value = 'opponent' // ИИ перевёл - он теперь атакующий
+          
+          // Ход переходит к тому кто был атакующим (теперь он защищается)
+          currentTurn.value = newDefender!
+          turnState.value = 'defend'
+          
+          // Если ход перешёл игроку - он будет защищаться
+          // Если ход снова к ИИ (редкий случай) - продолжаем
+          if (currentTurn.value === 'opponent') {
             setTimeout(() => aiTurn(), 1000)
-          } else {
-            // Игрок атаковал -> ИИ перевёл -> ход к игроку для защиты
-            currentTurn.value = 'player'
-            turnState.value = 'defend'
           }
 
           saveGameState()
@@ -622,6 +636,34 @@ async function loadGame(sid: string) {
         takeCards('opponent')
       }
     }
+  }
+
+  function passAttackTurn() {
+    // Передать ход защитнику после подкидывания карт
+    if (turnState.value !== 'attack' || attackCards.value.length === 0) {
+      console.log('❌ Нельзя передать ход - нет карт атаки')
+      return
+    }
+    
+    const mySide = playerRole.value ?? 'player'
+    
+    // Переход к защите
+    currentTurn.value = mySide === 'player' ? 'opponent' : 'player'
+    turnState.value = 'defend'
+    hasDefended.value = false
+    
+    // В переводном дураке можно переводить только если ничего не отбито
+    if (mode.value === 'perevolnoy') {
+      canTransfer.value = true
+    }
+    
+    console.log('🔄 Ход передан защитнику:', currentTurn.value)
+    
+    if (isAIMode.value && currentTurn.value === 'opponent') {
+      setTimeout(() => aiTurn(), 1000)
+    }
+    
+    saveGameState()
   }
 
   function beatCards() {
@@ -757,6 +799,7 @@ async function loadGame(sid: string) {
     confirmDefend,
     confirmTransfer,
     cancelPendingCard,
+    passAttackTurn,
     beatCards,
     takeCards,
     loadGame,
