@@ -44,7 +44,18 @@ export interface GameState {
   canTransfer: boolean
   hasDefended: boolean
   isFirstRound: boolean
+  pendingTake?: 'player' | 'opponent' | null
 
   status: 'waiting' | 'playing' | 'finished'
   winner: 'player' | 'opponent' | 'draw' | null
+}
+
+export interface MoveEvent {
+  id: string
+  timestamp: number
+  player: 'player' | 'opponent'
+  playerName: string
+  type: 'attack' | 'defend' | 'transfer' | 'take' | 'beat'
+  cards: Card[]
+  description: string
 }

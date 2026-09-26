@@ -8,6 +8,7 @@ import PlayArea from '@/components/PlayArea.vue'
 import Deck from '@/components/Deck.vue'
 import GameControls from '@/components/GameControls.vue'
 import GameOverModal from '@/components/GameOverModal.vue'
+import MoveHistory from '@/components/MoveHistory.vue'
 import type { Card, GameMode } from '@/types/game'
 import { subscribeToGameSession } from '@/services/gameSession'
 
@@ -15,6 +16,7 @@ const route = useRoute()
 const gameStore = useGameStore()
 
 const isLoading = ref(true)
+const isHistoryOpen = ref(false)
 let unsubscribe: (() => void) | null = null
 
 const {
@@ -34,6 +36,7 @@ const {
   originalAttacker,
   selectedAttackCardIndex,
   pendingCard,
+  moveHistory,
   winner,
   isAIMode
 } = storeToRefs(gameStore)
@@ -195,6 +198,11 @@ const handleRematch = () => {
 
 <template>
   <main v-if="!isLoading" class="game-view">
+    <!-- Иконка истории ходов -->
+    <button class="history-btn" @click="isHistoryOpen = true" aria-label="История ходов">
+      <span class="history-icon">📜</span>
+    </button>
+    
     <!-- Верх: рука противника -->
     <div class="opponent-section">
       <PlayerHand :cards="enemyHand" :is-own="false" />
@@ -261,6 +269,13 @@ const handleRematch = () => {
 
     <!-- Модальное окно результата -->
     <GameOverModal :winner="winner" :player-role="playerRole" @rematch="handleRematch" />
+    
+    <!-- История ходов -->
+    <MoveHistory 
+      :is-open="isHistoryOpen" 
+      :history="moveHistory"
+      @close="isHistoryOpen = false"
+    />
   </main>
 </template>
 
@@ -336,6 +351,48 @@ const handleRematch = () => {
   gap: 0.5rem;
   align-items: flex-end;
   z-index: 100;
+}
+
+.history-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 60px;
+  height: 60px;
+  border: none;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  
+  &:hover {
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 215, 0, 0.2) 100%);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.history-icon {
+  font-size: 2rem;
+  display: block;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .info-badge {
