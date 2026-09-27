@@ -45,6 +45,7 @@ export interface GameState {
   hasDefended: boolean
   isFirstRound: boolean
   pendingTake?: 'player' | 'opponent' | null
+  moveHistory?: MoveEvent[]
 
   status: 'waiting' | 'playing' | 'finished'
   winner: 'player' | 'opponent' | 'draw' | null
@@ -58,4 +59,14 @@ export interface MoveEvent {
   type: 'attack' | 'defend' | 'transfer' | 'take' | 'beat'
   cards: Card[]
   description: string
+}
+
+export interface GameRound {
+  id: string
+  roundNumber: number
+  startTime: number
+  events: MoveEvent[]
+  result: 'beat' | 'taken' | 'in-progress'
+  attacker: 'player' | 'opponent'
+  defender: 'player' | 'opponent'
 }

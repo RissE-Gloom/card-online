@@ -187,7 +187,8 @@ export const useGameStore = defineStore('game', () => {
   function addMoveEvent(
     type: MoveEvent['type'],
     cards: Card[],
-    player: 'player' | 'opponent' = playerRole.value ?? 'player'
+    player: 'player' | 'opponent' = playerRole.value ?? 'player',
+    isFirstAttackOfRound: boolean = false
   ) {
     const playerName = player === 'player' ? 'Игрок 1' : 'Игрок 2'
     
@@ -196,21 +197,21 @@ export const useGameStore = defineStore('game', () => {
     
     switch (type) {
       case 'attack':
-        description = cards.length === 1 
-          ? `Атаковал картой ${cardNames}`
-          : `Подкинул карты: ${cardNames}`
+        description = isFirstAttackOfRound
+          ? `атаковал ${cardNames}`
+          : `подкинул ${cardNames}`
         break
       case 'defend':
-        description = `Защитился картой ${cardNames}`
+        description = `отбился ${cardNames}`
         break
       case 'transfer':
-        description = `Перевёл картой ${cardNames}`
+        description = `перевёл ${cardNames}`
         break
       case 'take':
-        description = `Взял карты со стола (${cards.length} шт.)`
+        description = `взял карты`
         break
       case 'beat':
-        description = 'Объявил "Бито"'
+        description = `объявил "Бито"`
         break
     }
     
@@ -265,6 +266,7 @@ export const useGameStore = defineStore('game', () => {
     hasDefended: hasDefended.value,
     isFirstRound: isFirstRound.value,
     pendingTake: pendingTake.value,
+    moveHistory: moveHistory.value,
 
     status: status.value,
     winner: winner.value
@@ -301,6 +303,7 @@ function applyGameState(gameState: GameState) {
   hasDefended.value = gameState.hasDefended ?? false
   isFirstRound.value = gameState.isFirstRound ?? true
   pendingTake.value = gameState.pendingTake ?? null
+  moveHistory.value = gameState.moveHistory ?? []
 
   status.value = gameState.status ?? 'waiting'
   winner.value = gameState.winner ?? null
@@ -321,12 +324,14 @@ async function saveGameState() {
       attackCards: state.attackCards.length,
       defendCards: state.defendCards.length,
       currentTurn: state.currentTurn,
-      turnState: state.turnState
+      turnState: state.turnState,
+      historyEvents: state.moveHistory?.length ?? 0
     })
     await updateGameSession(sessionId.value, state)
     console.log('✅ Game state saved successfully')
   } catch (error) {
     console.error('❌ Ошибка обновления игры в Firebase:', error)
+    console.error('State that failed:', getGameState())
   }
 }
 
@@ -394,6 +399,7 @@ async function loadGame(sid: string) {
     attackCards.value = []
     defendCards.value = []
     discardPile.value = []
+    moveHistory.value = [] // Очистка истории при новой игре
 
     console.log('🎮 Game initialized locally:', {
       playerHandSize: playerHand.value.length,
@@ -457,8 +463,10 @@ async function loadGame(sid: string) {
     if (turnState.value === 'attack') {
       // АТАКА ИГРОКА (подкидывание)
       
+      const isFirstAttackOfRound = attackCards.value.length === 0
+      
       // Сохраняем кто начал атаку (первая карта атаки)
-      if (attackCards.value.length === 0) {
+      if (isFirstAttackOfRound) {
         originalAttacker.value = mySide
       }
       
@@ -484,8 +492,8 @@ async function loadGame(sid: string) {
       myHandRef.value = myHandRef.value.filter(c => c.id !== card.id)
       attackCards.value.push(card)
       
-      // Записываем в историю
-      addMoveEvent('attack', [card], mySide)
+      // Записываем в историю (передаём флаг первой атаки)
+      addMoveEvent('attack', [card], mySide, isFirstAttackOfRound)
       
       // Проверяем есть ли ещё карты для подкидывания
       const ranksOnTable = new Set([
@@ -617,8 +625,13 @@ async function loadGame(sid: string) {
       }
       
       if (cardToPlay) {
+        const isFirstAttack = attackCards.value.length === 0
+        
         opponentHand.value = opponentHand.value.filter(c => c.id !== cardToPlay.id)
         attackCards.value.push(cardToPlay)
+        
+        // Записываем в историю
+        addMoveEvent('attack', [cardToPlay], 'opponent', isFirstAttack)
         
         currentTurn.value = 'player'
         turnState.value = 'defend'
@@ -647,6 +660,10 @@ async function loadGame(sid: string) {
           console.log('ИИ переводит!')
           opponentHand.value = opponentHand.value.filter(c => c.id !== transferCard.id)
           attackCards.value.push(transferCard)
+          
+          // Записываем в историю
+          addMoveEvent('transfer', [transferCard], 'opponent')
+          
           canTransfer.value = false
           hasDefended.value = false
           
@@ -676,6 +693,10 @@ async function loadGame(sid: string) {
         const defenseCard = validCards[0]
         opponentHand.value = opponentHand.value.filter(c => c.id !== defenseCard.id)
         defendCards.value.push(defenseCard)
+        
+        // Записываем в историю
+        addMoveEvent('defend', [defenseCard], 'opponent')
+        
         hasDefended.value = true
         canTransfer.value = false
 

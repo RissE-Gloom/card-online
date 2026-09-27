@@ -1,16 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Card } from '@/types/game'
-
-interface MoveEvent {
-  id: string
-  timestamp: number
-  player: 'player' | 'opponent'
-  playerName: string
-  type: 'attack' | 'defend' | 'transfer' | 'take' | 'beat'
-  cards: Card[]
-  description: string
-}
+import type { Card, MoveEvent } from '@/types/game'
 
 interface Props {
   isOpen: boolean
@@ -47,28 +37,6 @@ const getCardDisplay = (card: Card) => {
   }
   return `${card.rank}${suitSymbols[card.suit]}`
 }
-
-const getEventIcon = (type: string) => {
-  switch (type) {
-    case 'attack': return '⚔️'
-    case 'defend': return '🛡️'
-    case 'transfer': return '🔄'
-    case 'take': return '↓'
-    case 'beat': return '✓'
-    default: return '•'
-  }
-}
-
-const getEventColor = (type: string) => {
-  switch (type) {
-    case 'attack': return 'event-attack'
-    case 'defend': return 'event-defend'
-    case 'transfer': return 'event-transfer'
-    case 'take': return 'event-take'
-    case 'beat': return 'event-beat'
-    default: return ''
-  }
-}
 </script>
 
 <template>
@@ -99,15 +67,14 @@ const getEventColor = (type: string) => {
             <div 
               v-for="event in history" 
               :key="event.id"
-              :class="['event-item', getEventColor(event.type)]"
+              class="event-item"
             >
               <div class="event-time">{{ formatTime(event.timestamp) }}</div>
               <div class="event-body">
-                <div class="event-icon">{{ getEventIcon(event.type) }}</div>
                 <div class="event-details">
                   <div class="event-player">{{ event.playerName }}</div>
                   <div class="event-description">{{ event.description }}</div>
-                  <div v-if="event.cards.length > 0" class="event-cards">
+                  <div v-if="event.cards && event.cards.length > 0" class="event-cards">
                     <span 
                       v-for="card in event.cards" 
                       :key="card.id"
@@ -260,32 +227,12 @@ const getEventColor = (type: string) => {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 1rem;
-  border-left: 4px solid rgba(255, 255, 255, 0.2);
+  border-left: 4px solid rgba(255, 215, 0, 0.3);
   transition: all 0.2s ease;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);
     transform: translateX(4px);
-  }
-
-  &.event-attack {
-    border-left-color: #ef4444;
-  }
-
-  &.event-defend {
-    border-left-color: #10b981;
-  }
-
-  &.event-transfer {
-    border-left-color: #3b82f6;
-  }
-
-  &.event-take {
-    border-left-color: #f59e0b;
-  }
-
-  &.event-beat {
-    border-left-color: #8b5cf6;
   }
 }
 
@@ -300,13 +247,11 @@ const getEventColor = (type: string) => {
   gap: 1rem;
 }
 
-.event-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
 .event-details {
   flex: 1;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
 }
 
 .event-player {
