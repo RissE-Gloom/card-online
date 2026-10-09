@@ -80,16 +80,52 @@ const getSuitColor = (suit: string) => {
   &.small {
     width: 75px;
     height: 105px;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+    @media (max-width: 768px) and (orientation: portrait) {
+      width: 50px;
+      height: 70px;
+    }
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+    @media (max-width: 932px) and (orientation: landscape) {
+      width: 55px;
+      height: 77px;
+    }
   }
   
   &.medium {
     width: 111px;
     height: 193px;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+    @media (max-width: 768px) and (orientation: portrait) {
+      width: 65px;
+      height: 91px;
+    }
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+    @media (max-width: 932px) and (orientation: landscape) {
+      width: 70px;
+      height: 98px;
+    }
   }
   
   &.large {
     width: 111px;
     height: 193px;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+    @media (max-width: 768px) and (orientation: portrait) {
+      width: 65px;
+      height: 91px;
+    }
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ (основной режим для игры)
+    @media (max-width: 932px) and (orientation: landscape) {
+      width: 70px;
+      height: 98px;
+    }
     
     @media (min-width: 1920px) {
       width: 140px;
@@ -137,10 +173,28 @@ const getSuitColor = (suit: string) => {
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 2px;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 12px;
+  }
+  
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 11px;
+  }
 }
 
 .suit {
   font-size: 16px;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 11px;
+  }
+  
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 10px;
+  }
 }
 
 .card-center {
@@ -153,6 +207,15 @@ const getSuitColor = (suit: string) => {
 .suit-large {
   font-size: 56px;
   opacity: 0.2;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 35px;
+  }
+  
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 32px;
+  }
 }
 
 .card-back {
@@ -175,14 +238,41 @@ const getSuitColor = (suit: string) => {
 .small {
   .rank {
     font-size: 14px;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+    @media (max-width: 932px) and (orientation: landscape) {
+      font-size: 10px;
+    }
+    
+    @media (max-width: 768px) and (orientation: portrait) {
+      font-size: 9px;
+    }
   }
   
   .suit {
     font-size: 12px;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+    @media (max-width: 932px) and (orientation: landscape) {
+      font-size: 9px;
+    }
+    
+    @media (max-width: 768px) and (orientation: portrait) {
+      font-size: 8px;
+    }
   }
   
   .suit-large {
     font-size: 40px;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+    @media (max-width: 932px) and (orientation: landscape) {
+      font-size: 28px;
+    }
+    
+    @media (max-width: 768px) and (orientation: portrait) {
+      font-size: 25px;
+    }
   }
 }
 

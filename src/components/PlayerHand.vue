@@ -74,6 +74,18 @@ const isPending = (card: CardType) => {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.1rem;
+    max-width: 100%;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 0.1rem;
+    max-width: 100%;
+  }
 }
 
 .cards-container {
@@ -83,6 +95,19 @@ const isPending = (card: CardType) => {
   width: 100%;
   align-items: flex-end;
   justify-content: center;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ (основной режим для игры)
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.2rem;
+    height: 110px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 0.15rem;
+    height: 100px;
+    flex-wrap: wrap;
+  }
   
   @media (min-width: 1920px) {
     height: 250px;
@@ -98,6 +123,16 @@ const isPending = (card: CardType) => {
     &:hover {
       margin-bottom: 15px;
       z-index: 100 !important;
+      
+      // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+      @media (max-width: 932px) and (orientation: landscape) {
+        margin-bottom: 8px;
+      }
+      
+      // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+      @media (max-width: 768px) and (orientation: portrait) {
+        margin-bottom: 6px;
+      }
     }
   }
   
@@ -106,6 +141,16 @@ const isPending = (card: CardType) => {
     z-index: 100 !important;
     filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.9));
     animation: pendingPulse 1.5s infinite;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+    @media (max-width: 932px) and (orientation: landscape) {
+      margin-bottom: 15px;
+    }
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+    @media (max-width: 768px) and (orientation: portrait) {
+      margin-bottom: 12px;
+    }
   }
 }
 
@@ -125,5 +170,17 @@ const isPending = (card: CardType) => {
   border-radius: 20px;
   font-size: 0.875rem;
   font-weight: 600;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.65rem;
+  }
 }
 </style>

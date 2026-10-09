@@ -9,6 +9,7 @@ import Deck from '@/components/Deck.vue'
 import GameControls from '@/components/GameControls.vue'
 import GameOverModal from '@/components/GameOverModal.vue'
 import MoveHistory from '@/components/MoveHistory.vue'
+import GameMenu from '@/components/GameMenu.vue'
 import type { Card, GameMode } from '@/types/game'
 import { subscribeToGameSession } from '@/services/gameSession'
 
@@ -17,6 +18,7 @@ const gameStore = useGameStore()
 
 const isLoading = ref(true)
 const isHistoryOpen = ref(false)
+const isMenuOpen = ref(false)
 let unsubscribe: (() => void) | null = null
 
 const {
@@ -198,10 +200,16 @@ const handleRematch = () => {
 
 <template>
   <main v-if="!isLoading" class="game-view">
-    <!-- Иконка истории ходов -->
-    <button class="history-btn" @click="isHistoryOpen = true" aria-label="История ходов">
-      <span class="history-icon">📜</span>
-    </button>
+    <!-- Иконки в левом верхнем углу -->
+    <div class="top-left-controls">
+      <button class="control-icon-btn history-btn" @click="isHistoryOpen = true" aria-label="История ходов">
+        <span class="control-icon">📜</span>
+      </button>
+      
+      <button class="control-icon-btn menu-btn" @click="isMenuOpen = true" aria-label="Меню">
+        <span class="control-icon">⚙️</span>
+      </button>
+    </div>
     
     <!-- Верх: рука противника -->
     <div class="opponent-section">
@@ -276,6 +284,12 @@ const handleRematch = () => {
       :history="moveHistory"
       @close="isHistoryOpen = false"
     />
+    
+    <!-- Меню игры -->
+    <GameMenu 
+      :is-open="isMenuOpen"
+      @close="isMenuOpen = false"
+    />
   </main>
 </template>
 
@@ -292,6 +306,21 @@ const handleRematch = () => {
   padding: 0.25rem 0.5rem;
   gap: 0.5rem;
   justify-content: center;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ (основной режим для игры)
+  @media (max-width: 932px) and (orientation: landscape) {
+    padding: 0.15rem 0.25rem;
+    gap: 0.2rem;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    padding: 0.1rem 0.2rem;
+    gap: 0.15rem;
+  }
 }
 
 .opponent-section {
@@ -301,6 +330,11 @@ const handleRematch = () => {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    max-width: 100%;
+  }
 }
 
 .center-section {
@@ -315,6 +349,22 @@ const handleRematch = () => {
   width: 100%;
   max-height: 250px;
   
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ (основной режим для игры)
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.5rem;
+    padding: 0 0.25rem;
+    max-height: 120px;
+    flex-direction: row;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0 0.2rem;
+    max-height: none;
+  }
+  
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 1rem;
@@ -323,6 +373,15 @@ const handleRematch = () => {
 
 .deck-area {
   flex-shrink: 0;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+  @media (max-width: 932px) and (orientation: landscape) {
+    transform: scale(0.7);
+  }
+  
+  @media (max-width: 768px) and (orientation: portrait) {
+    transform: scale(0.6);
+  }
 }
 
 .play-area-wrapper {
@@ -331,6 +390,11 @@ const handleRematch = () => {
   align-items: center;
   justify-content: center;
   max-width: 1000px;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+  @media (max-width: 932px) and (orientation: landscape) {
+    max-width: 100%;
+  }
 }
 
 .player-section {
@@ -340,6 +404,11 @@ const handleRematch = () => {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ
+  @media (max-width: 932px) and (orientation: landscape) {
+    max-width: 100%;
+  }
 }
 
 .game-info {
@@ -351,12 +420,46 @@ const handleRematch = () => {
   gap: 0.5rem;
   align-items: flex-end;
   z-index: 100;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    top: 0.3rem;
+    right: 0.3rem;
+    gap: 0.2rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    top: 0.25rem;
+    right: 0.25rem;
+    gap: 0.15rem;
+  }
 }
 
-.history-btn {
+.top-left-controls {
   position: absolute;
   top: 1rem;
   left: 1rem;
+  display: flex;
+  gap: 1rem;
+  z-index: 100;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    top: 0.3rem;
+    left: 0.3rem;
+    gap: 0.4rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    top: 0.25rem;
+    left: 0.25rem;
+    gap: 0.3rem;
+  }
+}
+
+.control-icon-btn {
   width: 60px;
   height: 60px;
   border: none;
@@ -366,8 +469,21 @@ const handleRematch = () => {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 100;
   border: 2px solid rgba(255, 215, 0, 0.3);
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    width: 40px;
+    height: 40px;
+    border-width: 1.5px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    width: 35px;
+    height: 35px;
+    border-width: 1px;
+  }
   
   &:hover {
     transform: scale(1.1) rotate(5deg);
@@ -378,11 +494,41 @@ const handleRematch = () => {
   &:active {
     transform: scale(0.95);
   }
+  
+  &.history-btn:hover {
+    .control-icon {
+      animation: none;
+      transform: translateY(-2px);
+    }
+  }
+  
+  &.menu-btn {
+    .control-icon {
+      animation: rotate 4s linear infinite;
+    }
+    
+    &:hover .control-icon {
+      animation-duration: 1s;
+    }
+  }
 }
 
-.history-icon {
+.control-icon {
   font-size: 2rem;
   display: block;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 1.3rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 1.1rem;
+  }
+}
+
+.history-btn .control-icon {
   animation: float 3s ease-in-out infinite;
 }
 
@@ -395,6 +541,15 @@ const handleRematch = () => {
   }
 }
 
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .info-badge {
   background: rgba(0, 0, 0, 0.6);
   color: white;
@@ -403,5 +558,19 @@ const handleRematch = () => {
   font-size: 0.875rem;
   font-weight: 500;
   backdrop-filter: blur(10px);
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6rem;
+    border-radius: 12px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.55rem;
+    border-radius: 10px;
+  }
 }
 </style>

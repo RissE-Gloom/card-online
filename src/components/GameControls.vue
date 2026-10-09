@@ -67,6 +67,18 @@ const isDefender = () => {
   gap: 1rem;
   justify-content: center;
   padding: 0.5rem 0;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.4rem;
+    padding: 0.2rem 0;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 0.3rem;
+    padding: 0.15rem 0;
+  }
 }
 
 .control-btn {
@@ -83,6 +95,22 @@ const isDefender = () => {
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   white-space: nowrap;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.3rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    border-radius: 8px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 0.25rem;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.65rem;
+    border-radius: 7px;
+  }
   
   &:hover {
     transform: translateY(-2px);
@@ -106,6 +134,16 @@ const isDefender = () => {
   
   .icon {
     font-size: 1.25rem;
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+    @media (max-width: 932px) and (orientation: landscape) {
+      font-size: 0.9rem;
+    }
+    
+    // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+    @media (max-width: 768px) and (orientation: portrait) {
+      font-size: 0.8rem;
+    }
   }
   
   &.beat {

@@ -95,12 +95,36 @@ const handleAttackCardClick = (index: number) => {
   min-height: 150px;
   max-height: 200px;
   padding: 1rem;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ (основной режим для игры)
+  @media (max-width: 932px) and (orientation: landscape) {
+    min-height: 80px;
+    max-height: 120px;
+    padding: 0.3rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    min-height: 70px;
+    max-height: 100px;
+    padding: 0.25rem;
+  }
 }
 
 .empty-message {
   color: rgba(255, 255, 255, 0.5);
   font-size: 1rem;
   font-weight: 500;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 0.7rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 0.65rem;
+  }
 }
 
 .cards-grid {
@@ -109,6 +133,16 @@ const handleAttackCardClick = (index: number) => {
   gap: 1.5rem;
   justify-content: center;
   align-items: flex-start;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.5rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 0.4rem;
+  }
 }
 
 .card-slot {
@@ -116,12 +150,34 @@ const handleAttackCardClick = (index: number) => {
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 0.2rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 0.15rem;
+  }
 }
 
 .card-wrapper {
   width: 110px;
   height: 177px;
   position: relative;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ (основной режим для игры)
+  @media (max-width: 932px) and (orientation: landscape) {
+    width: 70px;
+    height: 98px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    width: 65px;
+    height: 91px;
+  }
   
   @media (min-width: 1920px) {
     width: 140px;
@@ -184,6 +240,22 @@ const handleAttackCardClick = (index: number) => {
   transition: all 0.2s ease;
   animation: pulse 2s infinite;
   
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    bottom: -30px;
+    width: 65px;
+    height: 25px;
+    font-size: 0.65rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    bottom: -28px;
+    width: 60px;
+    height: 22px;
+    font-size: 0.6rem;
+  }
+  
   &:hover {
     background: rgba(16, 185, 129, 0.3);
     border-color: #34d399;
@@ -201,6 +273,18 @@ const handleAttackCardClick = (index: number) => {
   position: relative;
   width: 110px;
   height: 177px;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    width: 70px;
+    height: 98px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    width: 65px;
+    height: 91px;
+  }
   
   @media (min-width: 1920px) {
     width: 140px;
@@ -223,6 +307,18 @@ const handleAttackCardClick = (index: number) => {
   transition: all 0.2s ease;
   animation: pulse 2s infinite;
   
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    gap: 4px;
+    border-width: 2px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    gap: 3px;
+    border-width: 2px;
+  }
+  
   &:hover {
     background: rgba(59, 130, 246, 0.25);
     border-color: #60a5fa;
@@ -233,6 +329,16 @@ const handleAttackCardClick = (index: number) => {
 .transfer-icon {
   font-size: 2.5rem;
   filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.8));
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 1.5rem;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 1.3rem;
+  }
 }
 
 .slot-label {
@@ -241,6 +347,18 @@ const handleAttackCardClick = (index: number) => {
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   letter-spacing: 0.5px;
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    font-size: 9px;
+    letter-spacing: 0.3px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    font-size: 8px;
+    letter-spacing: 0.2px;
+  }
 }
 
 .attack-card {
@@ -252,6 +370,16 @@ const handleAttackCardClick = (index: number) => {
 .defend-wrapper {
   margin-top: -130px;
   
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    margin-top: -75px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    margin-top: -70px;
+  }
+  
   @media (min-width: 1920px) {
     margin-top: -165px;
   }
@@ -262,5 +390,17 @@ const handleAttackCardClick = (index: number) => {
   top: 20px;
   left: 20px;
   transform: rotate(8deg);
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+  @media (max-width: 932px) and (orientation: landscape) {
+    top: 12px;
+    left: 12px;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    top: 10px;
+    left: 10px;
+  }
 }
 </style>
