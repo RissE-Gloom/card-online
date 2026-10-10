@@ -37,7 +37,7 @@ const isPending = (card: CardType) => {
 
 <template>
   <div :class="['player-hand', { own: isOwn }]">
-    <div class="cards-container">
+    <div class="cards-container" :class="{ 'many-cards': displayCards.length > 5 }">
       <div
         v-for="(card, index) in displayCards"
         :key="card.id"
@@ -112,10 +112,37 @@ const isPending = (card: CardType) => {
   @media (min-width: 1920px) {
     height: 250px;
   }
+  
+  // 🃏 МНОГО КАРТ (>5) - накладываем друг на друга
+  &.many-cards {
+    .card-wrapper {
+      margin-left: -45px; // Накладываем карты друг на друга
+      
+      &:first-child {
+        margin-left: 0; // Первая карта без отступа
+      }
+      
+      // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
+      @media (max-width: 932px) and (orientation: landscape) {
+        margin-left: -30px;
+      }
+      
+      // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+      @media (max-width: 768px) and (orientation: portrait) {
+        margin-left: -28px;
+      }
+      
+      // На больших экранах можно меньше накладывать
+      @media (min-width: 1920px) {
+        margin-left: -50px;
+      }
+    }
+  }
 }
 
 .card-wrapper {
   transition: transform 0.2s ease, margin-bottom 0.2s ease;
+  flex-shrink: 0; // Не сжимаем карты
   
   &.interactive {
     cursor: pointer;
