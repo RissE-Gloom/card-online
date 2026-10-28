@@ -76,6 +76,10 @@ const emit = defineEmits<Emits>()
       position: relative;
       left: -60px;
     }
+
+  @media (min-width: 920px) {
+      zoom: 1.5;
+    }
 }
 
 .card-count {
@@ -112,6 +116,10 @@ const emit = defineEmits<Emits>()
   width: 110px;
   height: 150px;
   flex-shrink: 0;
+
+  @media (min-width: 920px) {
+      display: none;
+    }
 }
 
 .trump-card {
