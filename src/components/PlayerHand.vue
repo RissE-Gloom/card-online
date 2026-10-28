@@ -83,8 +83,9 @@ const isPending = (card: CardType) => {
   
   // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
   @media (max-width: 768px) and (orientation: portrait) {
-    gap: 0.1rem;
+    gap: 0.05rem; // Минимальный gap
     max-width: 100%;
+    min-height: 0; // Позволяем сжиматься
   }
 }
 
@@ -105,8 +106,8 @@ const isPending = (card: CardType) => {
   // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
   @media (max-width: 768px) and (orientation: portrait) {
     gap: 0.15rem;
-    height: 100px;
-    flex-wrap: wrap;
+    height: 70px; // Уменьшена высота чтобы карты не уходили за экран
+    flex-wrap: nowrap; // Не переносим карты на новую строку
   }
   
   @media (min-width: 1920px) {

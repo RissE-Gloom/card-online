@@ -318,8 +318,12 @@ const handleRematch = () => {
   
   // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
   @media (max-width: 768px) and (orientation: portrait) {
-    padding: 0.1rem 0.2rem;
-    gap: 0.15rem;
+    padding: 0.1rem 0.2rem 0.05rem 0.2rem; // Уменьшен нижний padding
+    gap: 0.1rem; // Уменьшен gap между секциями
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden; // Запрет прокрутки
+    justify-content: space-between; // Равномерное распределение
   }
 }
 
@@ -334,6 +338,11 @@ const handleRematch = () => {
   // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ЛАНДШАФТ
   @media (max-width: 932px) and (orientation: landscape) {
     max-width: 100%;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    flex-shrink: 0; // Не сжимаем секцию оппонента
   }
 }
 
@@ -360,9 +369,11 @@ const handleRematch = () => {
   // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
   @media (max-width: 768px) and (orientation: portrait) {
     flex-direction: column;
-    gap: 0.3rem;
-    padding: 0 0.2rem;
+    gap: 0.2rem;
+    padding: 0 0.1rem;
     max-height: none;
+    flex: 1; // Занимаем доступное пространство
+    min-height: 0; // Позволяем сжиматься
   }
   
   @media (max-width: 768px) {
@@ -408,6 +419,12 @@ const handleRematch = () => {
   // 📱 МОБИЛЬНАЯ ВЕРСИЯ
   @media (max-width: 932px) and (orientation: landscape) {
     max-width: 100%;
+  }
+  
+  // 📱 МОБИЛЬНАЯ ВЕРСИЯ - ПОРТРЕТ
+  @media (max-width: 768px) and (orientation: portrait) {
+    flex-shrink: 0; // Не сжимаем секцию игрока
+    min-height: 0; // Позволяем уменьшаться
   }
 }
 
