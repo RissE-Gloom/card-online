@@ -77,7 +77,7 @@ const emit = defineEmits<Emits>()
       left: -60px;
     }
 
-  @media (min-width: 920px) {
+  @media (max-width: 920px) {
       zoom: 1.5;
     }
 }
@@ -117,7 +117,7 @@ const emit = defineEmits<Emits>()
   height: 150px;
   flex-shrink: 0;
 
-  @media (min-width: 920px) {
+  @media (max-width: 920px) {
       display: none;
     }
 }
